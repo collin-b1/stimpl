@@ -23,10 +23,11 @@ class State(object):
         return State(variable_name, variable_value, variable_type, self)
 
     def get_value(self, variable_name) -> Any:
+        # Check if variable is self
         if variable_name == self.variable_name:
             return self.value
         else:
-            return None
+            return self.next_state.get_value(variable_name)
 
     def __repr__(self) -> str:
         return f"{self.variable_name}: {self.value}, " + repr(self.next_state)
@@ -81,17 +82,16 @@ def evaluate(expression: Expr, state: State) -> Tuple[Optional[Any], Type, State
             return (printable_value, printable_type, new_state)
 
         case Sequence(exprs=exprs) | Program(exprs=exprs):
-            """ TODO: Implement. """
-            
             # Empty Program/Sequence returns (None, Unit())
             if len(exprs) < 1:
                 return evaluate(Ren(), state)
             
             # Instantiate variables
-            expr_result = expr_type = None
+            expr_result = None
+            expr_type = Unit()
             expr_state = state
             
-            # Iterate through each expression "expr" and evaluate it. Store its state for next iteration or for return value.
+            # Iterate through each expression "expr" and evaluate it. Store its state for next iteration and for return value.
             for expr in exprs:
                 expr_result, expr_type, expr_state = evaluate(expression=expr, state=expr_state)
             
